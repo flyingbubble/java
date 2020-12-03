@@ -1,7 +1,7 @@
         FileInputStream inputStream = new FileInputStream(new File("src/main/resources/mybatis-config.xml"));
 //        InputStream inputStream = Resources.getResourceAsStream("src/main/resources/mybatis-config.xml");
         //解析xml,封装到configuration
-  15      SqlSessionFactory build = new SqlSessionFactoryBuilder().build(inputStream);
+15      SqlSessionFactory build = new SqlSessionFactoryBuilder().build(inputStream);
         //创建执行器,返回defaultSqlSession
         SqlSession sqlSession = build.openSession();
         //动态代理通过接口创建对象
@@ -14,76 +14,76 @@
         
         
         public SqlSessionFactory build(InputStream inputStream, String environment, Properties properties) {
-					try {
-	32					XMLConfigBuilder parser = new XMLConfigBuilder(inputStream, environment, properties);
-						return build(parser.parse());
-					} catch (Exception e) {
-						throw ExceptionFactory.wrapException("Error building SqlSession.", e);
-					} finally {
-						ErrorContext.instance().reset();
-						try {
-							inputStream.close();
-						} catch (IOException e) {
-							// Intentionally ignore. Prefer previous error.
-						}
-					}
-				}
+	try {
+32 		XMLConfigBuilder parser = new XMLConfigBuilder(inputStream, environment, properties);
+		return build(parser.parse());
+	} catch (Exception e) {
+		throw ExceptionFactory.wrapException("Error building SqlSession.", e);
+	} finally {
+		ErrorContext.instance().reset();
+		try {
+			inputStream.close();
+		} catch (IOException e) {
+			// Intentionally ignore. Prefer previous error.
+		}
+		}
+	}
       
       public XMLConfigBuilder(InputStream inputStream, String environment, Properties props) {
-  36      this(new XPathParser(inputStream, true, props, new XMLMapperEntityResolver()), environment, props);
+36 85 	     this(new XPathParser(inputStream, true, props, new XMLMapperEntityResolver()), environment, props);
       }
       
       public XPathParser(InputStream inputStream, boolean validation, Properties variables, EntityResolver entityResolver) {
-   41     commonConstructor(validation, variables, entityResolver);
+41        commonConstructor(validation, variables, entityResolver);
 49        this.document = createDocument(new InputSource(inputStream));
       }
 			
-			private void commonConstructor(boolean validation, Properties variables, EntityResolver entityResolver) {
-				this.validation = validation;
-				this.entityResolver = entityResolver;
-				this.variables = variables;
-				XPathFactory factory = XPathFactory.newInstance();
-				this.xpath = factory.newXPath();
-			}
+	private void commonConstructor(boolean validation, Properties variables, EntityResolver entityResolver) {
+		this.validation = validation;
+		this.entityResolver = entityResolver;
+		this.variables = variables;
+		XPathFactory factory = XPathFactory.newInstance();
+		this.xpath = factory.newXPath();
+	}
   
-		private Document createDocument(InputSource inputSource) {
-			// important: this must only be called AFTER common constructor
-			try {
-				DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-				factory.setValidating(validation);
+	private Document createDocument(InputSource inputSource) {
+                // important: this must only be called AFTER common constructor
+                try {
+                        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                        factory.setValidating(validation);
 
-				factory.setNamespaceAware(false);
-				factory.setIgnoringComments(true);
-				factory.setIgnoringElementContentWhitespace(false);
-				factory.setCoalescing(false);
-				factory.setExpandEntityReferences(true);
+                        factory.setNamespaceAware(false);
+                        factory.setIgnoringComments(true);
+                        factory.setIgnoringElementContentWhitespace(false);
+                        factory.setCoalescing(false);
+                        factory.setExpandEntityReferences(true);
 
-				DocumentBuilder builder = factory.newDocumentBuilder();
-				builder.setEntityResolver(entityResolver);
-				builder.setErrorHandler(new ErrorHandler() {
-					@Override
-					public void error(SAXParseException exception) throws SAXException {
-						throw exception;
-					}
+                        DocumentBuilder builder = factory.newDocumentBuilder();
+                        builder.setEntityResolver(entityResolver);
+                        builder.setErrorHandler(new ErrorHandler() {
+                                @Override
+                                public void error(SAXParseException exception) throws SAXException {
+                                        throw exception;
+                                }
 
-					@Override
-					public void fatalError(SAXParseException exception) throws SAXException {
-						throw exception;
-					}
+                                @Override
+                                public void fatalError(SAXParseException exception) throws SAXException {
+                                        throw exception;
+                                }
 
-					@Override
-					public void warning(SAXParseException exception) throws SAXException {
-					}
-				});
-				return builder.parse(inputSource);
-			} catch (Exception e) {
-				throw new BuilderException("Error creating document instance.  Cause: " + e, e);
-			}
-		}
+                                @Override
+                                public void warning(SAXParseException exception) throws SAXException {
+                                }
+                        });
+                        return builder.parse(inputSource);
+                } catch (Exception e) {
+                        throw new BuilderException("Error creating document instance.  Cause: " + e, e);
+                }
+	}
       
-      //33
+     
        private XMLConfigBuilder(XPathParser parser, String environment, Properties props) {
-        super(new Configuration());
+95  165       super(new Configuration());
         ErrorContext.instance().resource("SQL Mapper Configuration");
         this.configuration.setVariables(props);
         this.parsed = false;
@@ -91,7 +91,7 @@
         this.parser = parser;
       }
   
-  //85
+
     public class Configuration {
 
       protected Environment environment;
@@ -161,7 +161,7 @@
       protected final Collection<MethodResolver> incompleteMethods = new LinkedList<>();
      ...}
       
-      //85
+      
        public BaseBuilder(Configuration configuration) {
         this.configuration = configuration;
         this.typeAliasRegistry = this.configuration.getTypeAliasRegistry();
