@@ -1,0 +1,185 @@
+        FileInputStream inputStream = new FileInputStream(new File("src/main/resources/mybatis-config.xml"));
+//        InputStream inputStream = Resources.getResourceAsStream("src/main/resources/mybatis-config.xml");
+        //解析xml,封装到configuration
+  15      SqlSessionFactory build = new SqlSessionFactoryBuilder().build(inputStream);
+        //创建执行器,返回defaultSqlSession
+        SqlSession sqlSession = build.openSession();
+        //动态代理通过接口创建对象
+        UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+        //通过...查找执行方法
+        List<User> users = mapper.selectAll();
+        for (int i = 0; i < users.size(); i++) {
+            System.out.println(users.get(i));
+        }
+        
+        
+        public SqlSessionFactory build(InputStream inputStream, String environment, Properties properties) {
+					try {
+	32					XMLConfigBuilder parser = new XMLConfigBuilder(inputStream, environment, properties);
+						return build(parser.parse());
+					} catch (Exception e) {
+						throw ExceptionFactory.wrapException("Error building SqlSession.", e);
+					} finally {
+						ErrorContext.instance().reset();
+						try {
+							inputStream.close();
+						} catch (IOException e) {
+							// Intentionally ignore. Prefer previous error.
+						}
+					}
+				}
+      
+      public XMLConfigBuilder(InputStream inputStream, String environment, Properties props) {
+  36      this(new XPathParser(inputStream, true, props, new XMLMapperEntityResolver()), environment, props);
+      }
+      
+      public XPathParser(InputStream inputStream, boolean validation, Properties variables, EntityResolver entityResolver) {
+   41     commonConstructor(validation, variables, entityResolver);
+49        this.document = createDocument(new InputSource(inputStream));
+      }
+			
+			private void commonConstructor(boolean validation, Properties variables, EntityResolver entityResolver) {
+				this.validation = validation;
+				this.entityResolver = entityResolver;
+				this.variables = variables;
+				XPathFactory factory = XPathFactory.newInstance();
+				this.xpath = factory.newXPath();
+			}
+  
+		private Document createDocument(InputSource inputSource) {
+			// important: this must only be called AFTER common constructor
+			try {
+				DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+				factory.setValidating(validation);
+
+				factory.setNamespaceAware(false);
+				factory.setIgnoringComments(true);
+				factory.setIgnoringElementContentWhitespace(false);
+				factory.setCoalescing(false);
+				factory.setExpandEntityReferences(true);
+
+				DocumentBuilder builder = factory.newDocumentBuilder();
+				builder.setEntityResolver(entityResolver);
+				builder.setErrorHandler(new ErrorHandler() {
+					@Override
+					public void error(SAXParseException exception) throws SAXException {
+						throw exception;
+					}
+
+					@Override
+					public void fatalError(SAXParseException exception) throws SAXException {
+						throw exception;
+					}
+
+					@Override
+					public void warning(SAXParseException exception) throws SAXException {
+					}
+				});
+				return builder.parse(inputSource);
+			} catch (Exception e) {
+				throw new BuilderException("Error creating document instance.  Cause: " + e, e);
+			}
+		}
+      
+      //33
+       private XMLConfigBuilder(XPathParser parser, String environment, Properties props) {
+        super(new Configuration());
+        ErrorContext.instance().resource("SQL Mapper Configuration");
+        this.configuration.setVariables(props);
+        this.parsed = false;
+        this.environment = environment;
+        this.parser = parser;
+      }
+  
+  //85
+    public class Configuration {
+
+      protected Environment environment;
+
+      protected boolean safeRowBoundsEnabled;
+      protected boolean safeResultHandlerEnabled = true;
+      protected boolean mapUnderscoreToCamelCase;
+      protected boolean aggressiveLazyLoading;
+      protected boolean multipleResultSetsEnabled = true;
+      protected boolean useGeneratedKeys;
+      protected boolean useColumnLabel = true;
+      protected boolean cacheEnabled = true;
+      protected boolean callSettersOnNulls;
+      protected boolean useActualParamName = true;
+      protected boolean returnInstanceForEmptyRow;
+
+      protected String logPrefix;
+      protected Class<? extends Log> logImpl;
+      protected Class<? extends VFS> vfsImpl;
+      protected LocalCacheScope localCacheScope = LocalCacheScope.SESSION;
+      protected JdbcType jdbcTypeForNull = JdbcType.OTHER;
+      protected Set<String> lazyLoadTriggerMethods = new HashSet<>(Arrays.asList("equals", "clone", "hashCode", "toString"));
+      protected Integer defaultStatementTimeout;
+      protected Integer defaultFetchSize;
+      protected ResultSetType defaultResultSetType;
+      protected ExecutorType defaultExecutorType = ExecutorType.SIMPLE;
+      protected AutoMappingBehavior autoMappingBehavior = AutoMappingBehavior.PARTIAL;
+      protected AutoMappingUnknownColumnBehavior autoMappingUnknownColumnBehavior = AutoMappingUnknownColumnBehavior.NONE;
+
+      protected Properties variables = new Properties();
+      protected ReflectorFactory reflectorFactory = new DefaultReflectorFactory();
+      protected ObjectFactory objectFactory = new DefaultObjectFactory();
+      protected ObjectWrapperFactory objectWrapperFactory = new DefaultObjectWrapperFactory();
+
+      protected boolean lazyLoadingEnabled = false;
+      protected ProxyFactory proxyFactory = new JavassistProxyFactory(); // #224 Using internal Javassist instead of OGNL
+
+      protected String databaseId;
+      /**
+       * Configuration factory class.
+       * Used to create Configuration for loading deserialized unread properties.
+       *
+       * @see <a href='https://code.google.com/p/mybatis/issues/detail?id=300'>Issue 300 (google code)</a>
+       */
+      protected Class<?> configurationFactory;
+
+      protected final MapperRegistry mapperRegistry = new MapperRegistry(this);
+      protected final InterceptorChain interceptorChain = new InterceptorChain();
+      protected final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry();
+      protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
+      protected final LanguageDriverRegistry languageRegistry = new LanguageDriverRegistry();
+
+      protected final Map<String, MappedStatement> mappedStatements = new StrictMap<MappedStatement>("Mapped Statements collection")
+          .conflictMessageProducer((savedValue, targetValue) ->
+              ". please check " + savedValue.getResource() + " and " + targetValue.getResource());
+      protected final Map<String, Cache> caches = new StrictMap<>("Caches collection");
+      protected final Map<String, ResultMap> resultMaps = new StrictMap<>("Result Maps collection");
+      protected final Map<String, ParameterMap> parameterMaps = new StrictMap<>("Parameter Maps collection");
+      protected final Map<String, KeyGenerator> keyGenerators = new StrictMap<>("Key Generators collection");
+
+      protected final Set<String> loadedResources = new HashSet<>();
+      protected final Map<String, XNode> sqlFragments = new StrictMap<>("XML fragments parsed from previous mappers");
+
+      protected final Collection<XMLStatementBuilder> incompleteStatements = new LinkedList<>();
+      protected final Collection<CacheRefResolver> incompleteCacheRefs = new LinkedList<>();
+      protected final Collection<ResultMapResolver> incompleteResultMaps = new LinkedList<>();
+      protected final Collection<MethodResolver> incompleteMethods = new LinkedList<>();
+     ...}
+      
+      //85
+       public BaseBuilder(Configuration configuration) {
+        this.configuration = configuration;
+        this.typeAliasRegistry = this.configuration.getTypeAliasRegistry();
+        this.typeHandlerRegistry = this.configuration.getTypeHandlerRegistry();
+      }
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
