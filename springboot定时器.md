@@ -64,7 +64,8 @@ public class DynamicScheduleTask implements SchedulingConfigurer {
 
     taskRegistrar.addTriggerTask(
         //1.添加任务内容(Runnable)
-        () -> System.out.println("执行动态定时任务: " + LocalDateTime.now().toLocalTime()),
+        () -> System.out.println("执行动态定时任务: " 
+        + LocalDateTime.now().toLocalTime()),
         //2.设置执行周期(Trigger)
         triggerContext -> {
           //2.1 从数据库获取执行周期
@@ -92,7 +93,8 @@ public class MultithreadScheduleTask {
     @Async
     @Scheduled(fixedDelay = 1000) 
     public void first() throws InterruptedException {
-      System.out.println("第一个定时任务开始 : " + LocalDateTime.now().toLocalTime() + "\r\n线程 : " + Thread.currentThread().getName());
+      System.out.println("第一个定时任务开始 : " 
+      + LocalDateTime.now().toLocalTime() + "\r\n线程 : " + Thread.currentThread().getName());
       System.out.println();
       Thread.sleep(1000 * 10);
     }
